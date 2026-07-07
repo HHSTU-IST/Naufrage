@@ -21,6 +21,7 @@ GameState="*res://scripts/autoload/game_state.gd"
 SaveManager="*res://scripts/autoload/save_manager.gd"
 ConfigDB="*res://scripts/autoload/config_db.gd"
 EventBus="*res://scripts/autoload/event_bus.gd"
+InputSetup="*res://scripts/autoload/input_setup.gd"
 
 [display]
 

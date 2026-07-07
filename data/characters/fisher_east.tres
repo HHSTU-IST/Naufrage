@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://data/character_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "fisher_east"
+display_name = "东侧渔民"
+route_id = "east"
+portrait_path = "res://assets/portraits/portrait_fisher_east.png"
+initial_state = 0
+reliability = 0.5
+description = "东边路线的信息源。"
