@@ -16,6 +16,12 @@ func _ready() -> void:
 	_gs = get_node("/root/GameState")
 	_eb = get_node("/root/EventBus")
 	_sm = get_node("/root/SaveManager")
+	if _gs == null or _eb == null or _sm == null:
+		push_error("GameRoot: autoload nodes not available")
+		return
+	if day_system == null or food_system == null or npc_system == null or route_system == null or ending_system == null:
+		push_error("GameRoot: system nodes not available")
+		return
 	_gs.state_changed.connect(_on_state_changed)
 	_eb.dialogue_requested.connect(_on_dialogue_requested)
 	_eb.route_requested.connect(_on_route_requested)

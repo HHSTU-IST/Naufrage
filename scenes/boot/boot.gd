@@ -6,6 +6,9 @@ var _sm: Node
 func _ready() -> void:
 	_gs = get_node("/root/GameState")
 	_sm = get_node("/root/SaveManager")
+	if _gs == null or _sm == null:
+		push_error("Boot: autoload nodes not available")
+		return
 	if not _restore_saved_game():
 		_gs.reset_game()
 	get_tree().change_scene_to_file("res://scenes/game/game_root.tscn")

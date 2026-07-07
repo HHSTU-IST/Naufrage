@@ -22,6 +22,18 @@ var _eb: Node
 func _ready() -> void:
 	_gs = get_node("/root/GameState")
 	_eb = get_node("/root/EventBus")
+	if _gs == null or _eb == null:
+		push_error("HUD: autoload nodes not available")
+		return
+	if day_label == null or food_label == null or dream_label == null or route_label == null or npc_label == null or log_label == null:
+		push_error("HUD: label nodes not available")
+		return
+	if talk_button == null or rescue_button == null or forward_button == null or back_button == null or sleep_button == null:
+		push_error("HUD: button nodes not available")
+		return
+	if save_button == null or load_button == null or clear_button == null or next_npc_button == null:
+		push_error("HUD: action button nodes not available")
+		return
 	_gs.state_changed.connect(_refresh)
 	_gs.day_changed.connect(_on_day_changed)
 	_gs.food_changed.connect(_on_food_changed)

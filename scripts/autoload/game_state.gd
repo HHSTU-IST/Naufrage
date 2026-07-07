@@ -33,11 +33,14 @@ func _ready() -> void:
 	_cdb = get_node("/root/ConfigDB")
 
 func reset_game() -> void:
-	if _cdb == null:
-		return
-	var config: Variant = _cdb.get_game_config()
-	max_day = int(config.get("max_day", 15)) if config != null else 15
-	starting_food = int(config.get("starting_food", DEFAULT_FOOD)) if config != null else DEFAULT_FOOD
+	if _cdb != null:
+		var config: Variant = _cdb.get_game_config()
+		max_day = int(config.get("max_day", 15)) if config != null else 15
+		starting_food = int(config.get("starting_food", DEFAULT_FOOD)) if config != null else DEFAULT_FOOD
+	else:
+		push_warning("GameState: ConfigDB not available, using default values")
+		max_day = 15
+		starting_food = DEFAULT_FOOD
 	current_day = DEFAULT_DAY
 	food = starting_food
 	is_dream_today = false
