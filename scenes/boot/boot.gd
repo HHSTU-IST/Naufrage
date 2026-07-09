@@ -1,7 +1,7 @@
 extends Node
 
-var _gs: GameState
-var _sm: SaveManager
+var _gs: Variant
+var _sm: Variant
 
 func _ready() -> void:
 	_gs = get_node("/root/GameState")

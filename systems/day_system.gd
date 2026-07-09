@@ -1,13 +1,13 @@
 extends Node
 class_name DaySystem
 
-@onready var dream_system: DreamSystem = $"../DreamSystem"
+var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+
+func _ready() -> void:
+	rng.randomize()
 
 func start_day() -> void:
-	if dream_system != null:
-		GameState.set_dream_today(dream_system.roll_today())
-	else:
-		GameState.set_dream_today(false)
+	GameState.set_dream_today(rng.randi_range(0, 1) == 1)
 
 func end_day() -> void:
 	GameState.advance_day()

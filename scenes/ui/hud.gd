@@ -1,8 +1,8 @@
 extends Control
 
-var _gs: GameState
-var _eb: Node
-var _cdb: ConfigDB
+var _gs: Variant
+var _eb: Variant
+var _cdb: Variant
 
 # 玩家呼吸动画帧
 const PLAYER_BREATH_FRAMES := [

@@ -1,8 +1,8 @@
 extends Node
 class_name NpcSystem
 
-var _cdb: ConfigDB
-var _eb: Node
+var _cdb: Variant
+var _eb: Variant
 
 func _ready() -> void:
 	_cdb = get_node_or_null("/root/ConfigDB")

@@ -48,7 +48,7 @@ func load_game(slot_id: int) -> bool:
 	var raw_text: String = file.get_as_text()
 	file.close()
 
-	var parsed = JSON.parse_string(raw_text)
+	var parsed: Variant = JSON.parse_string(raw_text)
 	if parsed == null or typeof(parsed) != TYPE_DICTIONARY:
 		push_error("SaveManager: invalid save payload in %s" % path)
 		return false

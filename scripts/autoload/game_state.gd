@@ -160,7 +160,7 @@ func add_clue(clue_id: String) -> void:
 	state_changed.emit()
 
 
-func set_flag(flag_name: String, value: bool) -> void:
+func set_flag(flag_name: String, value: Variant) -> void:
 	flags[flag_name] = value
 	flag_changed.emit(flag_name, value)
 	state_changed.emit()
@@ -170,7 +170,7 @@ func clear_flag(flag_name: String) -> void:
 	if not flags.has(flag_name):
 		return
 	flags.erase(flag_name)
-	flag_changed.emit(flag_name, false)
+	flag_changed.emit(flag_name, null)
 	state_changed.emit()
 
 

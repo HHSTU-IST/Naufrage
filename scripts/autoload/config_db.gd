@@ -87,8 +87,11 @@ func _load_resource(path: String) -> Resource:
 	return null
 
 
-func _load_resource_or_variant(path: String, extension: String) -> Resource:
+func _load_resource_or_variant(path: String, extension: String) -> Variant:
 	if extension == "json":
-		return null  # JSON not expected in current resource folders
+		var file: FileAccess = FileAccess.open(path, FileAccess.READ)
+		if file == null:
+			return null
+		return JSON.parse_string(file.get_as_text())
 	return _load_resource(path)
 
