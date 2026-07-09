@@ -4,10 +4,26 @@ var _gs: Variant
 var _eb: Variant
 var _cdb: Variant
 
-const NPC_SPRITE_MAP := {
-	"fisher_west": "res://assets/sprites/npc-1-action.png",
-	"fisher_north": "res://assets/sprites/npc-2-action.png",
-	"fisher_east": "res://assets/sprites/npc-3-action.png",
+# 每个 NPC 的状态 → 精灵路径映射
+const NPC_STATE_SPRITES := {
+	"fisher_west": {
+		0: "res://assets/sprites/渔夫/A_west_01_coma_injured.png",
+		1: "res://assets/sprites/渔夫/A_west_02_awake.png",
+		2: "res://assets/sprites/渔夫/A_west_03_recover.png",
+		3: "res://assets/sprites/渔夫/A_west_04_stand_full.png",
+	},
+	"fisher_north": {
+		0: "res://assets/sprites/渔夫/B_north_01_coma_injured.png",
+		1: "res://assets/sprites/渔夫/B_north_02_awake.png",
+		2: "res://assets/sprites/渔夫/B_north_03_recover.png",
+		3: "res://assets/sprites/渔夫/B_north_04_stand_full.png",
+	},
+	"fisher_east": {
+		0: "res://assets/sprites/渔夫/C_east_01_injured_initial.png",
+		1: "res://assets/sprites/渔夫/C_east_02_awake.png",
+		2: "res://assets/sprites/渔夫/C_east_03_recover.png",
+		3: "res://assets/sprites/渔夫/C_east_04_stand_full.png",
+	},
 }
 
 @onready var day_label: Label = $Root/TopBar/DayLabel
@@ -24,8 +40,12 @@ const NPC_SPRITE_MAP := {
 @onready var save_button: Button = $Root/Actions/SaveButton
 @onready var load_button: Button = $Root/Actions/LoadButton
 @onready var clear_button: Button = $Root/Actions/ClearButton
-@onready var next_npc_button: Button = $Root/NpcRow/NextNpcButton
-@onready var npc_sprite: TextureRect = $SceneLayer/NpcSprite
+@onready var west_button: Button = $Root/NpcRow/WestNpcButton
+@onready var north_button: Button = $Root/NpcRow/NorthNpcButton
+@onready var east_button: Button = $Root/NpcRow/EastNpcButton
+@onready var npc_west_sprite: TextureRect = $NpcWestSprite
+@onready var npc_north_sprite: TextureRect = $NpcNorthSprite
+@onready var npc_east_sprite: TextureRect = $NpcEastSprite
 @onready var scene_background: TextureRect = $SceneBackground
 
 func _ready() -> void:
@@ -41,13 +61,17 @@ func _ready() -> void:
 	if talk_button == null or rescue_button == null or forward_button == null or back_button == null or sleep_button == null:
 		push_error("HUD: button nodes not available")
 		return
-	if save_button == null or load_button == null or clear_button == null or next_npc_button == null:
+	if save_button == null or load_button == null or clear_button == null:
 		push_error("HUD: action button nodes not available")
+		return
+	if west_button == null or north_button == null or east_button == null:
+		push_error("HUD: NPC buttons not available")
 		return
 	_gs.state_changed.connect(_refresh)
 	_gs.day_changed.connect(_on_day_changed)
 	_gs.food_changed.connect(_on_food_changed)
 	_gs.ending_changed.connect(_on_ending_changed)
+	_gs.npc_state_changed.connect(_on_npc_state_changed)
 	talk_button.pressed.connect(func(): _eb.dialogue_requested.emit(_gs.selected_npc_id))
 	rescue_button.pressed.connect(func(): _eb.rescue_requested.emit(_gs.selected_npc_id))
 	forward_button.pressed.connect(func(): _eb.route_requested.emit("forward"))
@@ -56,7 +80,9 @@ func _ready() -> void:
 	save_button.pressed.connect(func(): _eb.save_requested.emit(0))
 	load_button.pressed.connect(func(): _eb.load_requested.emit(0))
 	clear_button.pressed.connect(func(): _eb.clear_requested.emit(0))
-	next_npc_button.pressed.connect(_cycle_npc)
+	west_button.pressed.connect(func(): _select_npc("fisher_west"))
+	north_button.pressed.connect(func(): _select_npc("fisher_north"))
+	east_button.pressed.connect(func(): _select_npc("fisher_east"))
 	_refresh()
 
 func _refresh() -> void:
@@ -67,30 +93,42 @@ func _refresh() -> void:
 	npc_label.text = "NPC: %s" % (_gs.selected_npc_id if not _gs.selected_npc_id.is_empty() else "-")
 	talk_button.disabled = _gs.selected_npc_id.is_empty()
 	rescue_button.disabled = _gs.selected_npc_id.is_empty()
-	_update_npc_sprite()
+	_update_all_npc_sprites()
 	_update_scene_background()
 
-func _update_npc_sprite() -> void:
-	if npc_sprite == null:
+func _select_npc(npc_id: String) -> void:
+	_gs.set_selected_npc(npc_id)
+	_refresh()
+
+func _update_all_npc_sprites() -> void:
+	_update_single_npc_sprite(npc_west_sprite, "fisher_west")
+	_update_single_npc_sprite(npc_north_sprite, "fisher_north")
+	_update_single_npc_sprite(npc_east_sprite, "fisher_east")
+
+func _update_single_npc_sprite(sprite: TextureRect, npc_id: String) -> void:
+	if sprite == null:
 		return
-	var npc_id: String = _gs.selected_npc_id
-	if npc_id.is_empty():
-		npc_sprite.visible = false
-		return
-	npc_sprite.visible = true
-	var path: String = NPC_SPRITE_MAP.get(npc_id, "")
+	var state: int = _gs.get_npc_state(npc_id, 0)
+	var state_map: Dictionary = NPC_STATE_SPRITES.get(npc_id, {})
+	var path: String = state_map.get(state, "")
 	if not path.is_empty() and ResourceLoader.exists(path):
-		npc_sprite.texture = load(path)
+		sprite.texture = load(path)
+		sprite.visible = true
+	else:
+		sprite.visible = false
+
+func _on_npc_state_changed(npc_id: String, _state_value: int) -> void:
+	_refresh()
 
 func _update_scene_background() -> void:
 	if scene_background == null:
 		return
 	if _gs.is_dream_today:
-		var dream_path: String = "res://assets/sprites/scene-dream.png"
+		var dream_path: String = "res://assets/sprites/背景/dream_sunset.png"
 		if ResourceLoader.exists(dream_path):
 			scene_background.texture = load(dream_path)
 	else:
-		var main_path: String = "res://assets/sprites/ui-main.png"
+		var main_path: String = "res://assets/sprites/背景/beach_day_main.png"
 		if ResourceLoader.exists(main_path):
 			scene_background.texture = load(main_path)
 
@@ -113,13 +151,3 @@ func _show_ending_image(image_path: String) -> void:
 	if scene_background == null or not ResourceLoader.exists(image_path):
 		return
 	scene_background.texture = load(image_path)
-
-func _cycle_npc() -> void:
-	var order: Array[String] = ["fisher_west", "fisher_north", "fisher_east"]
-	var index: int = order.find(_gs.selected_npc_id)
-	if index < 0:
-		index = 0
-	else:
-		index = (index + 1) % order.size()
-	_gs.set_selected_npc(order[index])
-	_refresh()

@@ -7,4 +7,4 @@ script = ExtResource("1")
 id = "ending_starve"
 title = "饥饿结局"
 description = "食物耗尽，你倒在了无尽的海岸线上。"
-image_path = "res://assets/sprites/scene-dream.png"
+image_path = "res://assets/sprites/背景/16_ending_starve_skull.png"

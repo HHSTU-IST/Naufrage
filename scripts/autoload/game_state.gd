@@ -51,7 +51,11 @@ func reset_game() -> void:
 	current_route = "west"
 	route_distance = 0
 	selected_npc_id = ""
-	npc_states = {}
+	npc_states = {
+		"fisher_west": 0,
+		"fisher_north": 0,
+		"fisher_east": 0,
+	}
 	clues = []
 	flags = {}
 	ending_id = ""
