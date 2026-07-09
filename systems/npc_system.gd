@@ -1,8 +1,8 @@
 extends Node
 class_name NpcSystem
 
-var _cdb: Variant
-var _eb: Variant
+var _cdb: ConfigDB
+var _eb: Node
 
 func _ready() -> void:
 	_cdb = get_node_or_null("/root/ConfigDB")
@@ -46,6 +46,9 @@ func _show_dialogue_for_npc(npc_id: String) -> void:
 		return
 	# Mark dialogue as seen
 	GameState.set_flag("dialogue_seen_%s" % best_dialogue.id, true)
+	# Add clue if present
+	if not best_dialogue.clue_id.is_empty():
+		GameState.add_clue(best_dialogue.clue_id)
 	# Get speaker display name
 	var speaker_name: String = npc_id
 	if _cdb.has_character(npc_id):

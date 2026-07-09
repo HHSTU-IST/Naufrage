@@ -1,8 +1,8 @@
 extends Node
 class_name RouteSystem
 
-var _cdb: Variant
-var _eb: Variant
+var _cdb: ConfigDB
+var _eb: Node
 
 func _ready() -> void:
 	_cdb = get_node_or_null("/root/ConfigDB")
@@ -33,7 +33,7 @@ func try_advance_route() -> void:
 	var idx := routes.find(GameState.current_route)
 	if idx < 0 or idx >= routes.size() - 1:
 		return  # 已经是最后一条路线
-	var next_route := routes[idx + 1]
+	var next_route: String = routes[idx + 1]
 	# 只有当对应 NPC 已被救援（state >= 1）时才能切换
 	var route_npc_map := {"west": "fisher_west", "north": "fisher_north", "east": "fisher_east"}
 	var required_npc := route_npc_map.get(next_route, "")

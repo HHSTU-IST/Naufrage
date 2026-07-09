@@ -1,9 +1,15 @@
 extends Control
 
-var _gs: Variant
-var _eb: Variant
-var _cdb: Variant
+var _gs: GameState
+var _eb: Node
+var _cdb: ConfigDB
 
+# 玩家呼吸动画帧
+const PLAYER_BREATH_FRAMES := [
+	"res://assets/sprites/各种动作/player_breath_01.png",
+	"res://assets/sprites/各种动作/player_breath_02.png",
+	"res://assets/sprites/各种动作/player_breath_03.png",
+]
 # 每个 NPC 的状态 → 精灵路径映射
 const NPC_STATE_SPRITES := {
 	"fisher_west": {
@@ -26,6 +32,8 @@ const NPC_STATE_SPRITES := {
 	},
 }
 
+var _breath_index: int = 0
+
 @onready var day_label: Label = $Root/TopBar/DayLabel
 @onready var food_label: Label = $Root/TopBar/FoodLabel
 @onready var dream_label: Label = $Root/TopBar/DreamLabel
@@ -40,6 +48,7 @@ const NPC_STATE_SPRITES := {
 @onready var save_button: Button = $Root/Actions/SaveButton
 @onready var load_button: Button = $Root/Actions/LoadButton
 @onready var clear_button: Button = $Root/Actions/ClearButton
+@onready var restart_button: Button = $Root/Actions/RestartButton
 @onready var west_button: Button = $Root/NpcRow/WestNpcButton
 @onready var north_button: Button = $Root/NpcRow/NorthNpcButton
 @onready var east_button: Button = $Root/NpcRow/EastNpcButton
@@ -47,6 +56,7 @@ const NPC_STATE_SPRITES := {
 @onready var npc_north_sprite: TextureRect = $NpcNorthSprite
 @onready var npc_east_sprite: TextureRect = $NpcEastSprite
 @onready var scene_background: TextureRect = $SceneBackground
+@onready var player_sprite: TextureRect = $PlayerSprite
 @onready var dialogue_panel: PanelContainer = $DialoguePanel
 @onready var dialogue_speaker: Label = $DialoguePanel/DialogueBox/DialogueSpeaker
 @onready var dialogue_text: Label = $DialoguePanel/DialogueBox/DialogueText
@@ -64,7 +74,7 @@ func _ready() -> void:
 	if talk_button == null or rescue_button == null or forward_button == null or back_button == null or sleep_button == null:
 		push_error("HUD: button nodes not available")
 		return
-	if save_button == null or load_button == null or clear_button == null:
+	if save_button == null or load_button == null or clear_button == null or restart_button == null:
 		push_error("HUD: action button nodes not available")
 		return
 	if west_button == null or north_button == null or east_button == null:
@@ -84,10 +94,12 @@ func _ready() -> void:
 	save_button.pressed.connect(func(): _eb.save_requested.emit(0))
 	load_button.pressed.connect(func(): _eb.load_requested.emit(0))
 	clear_button.pressed.connect(func(): _eb.clear_requested.emit(0))
+	restart_button.pressed.connect(func(): _eb.game_reset_requested.emit())
 	west_button.pressed.connect(func(): _select_npc("fisher_west"))
 	north_button.pressed.connect(func(): _select_npc("fisher_north"))
 	east_button.pressed.connect(func(): _select_npc("fisher_east"))
 	_refresh()
+	_start_breath_animation()
 
 func _refresh() -> void:
 	day_label.text = "Day %d" % _gs.current_day
@@ -147,14 +159,45 @@ func _on_ending_changed(ending_id: String) -> void:
 	log_label.text = "结局: %s" % ending_id
 	# Show ending image overlay
 	if not ending_id.is_empty() and _cdb != null:
-		var ending_data: Variant = _cdb.get_ending(ending_id)
-		if ending_data != null and ending_data.has_method("get") and not ending_data.image_path.is_empty():
+		var ending_data: EndingData = _cdb.get_ending(ending_id) as EndingData
+		if ending_data != null and not ending_data.image_path.is_empty():
 			_show_ending_image(ending_data.image_path)
+			_show_ending_title(ending_data.title, ending_data.description)
 
 func _show_ending_image(image_path: String) -> void:
 	if scene_background == null or not ResourceLoader.exists(image_path):
 		return
 	scene_background.texture = load(image_path)
+
+func _show_ending_title(title: String, description: String) -> void:
+	if dialogue_panel == null or dialogue_speaker == null or dialogue_text == null:
+		return
+	dialogue_speaker.text = title
+	dialogue_text.text = description
+	dialogue_panel.visible = true
+	# Keep ending info visible longer
+	var timer := get_tree().create_timer(10.0)
+	timer.timeout.connect(func():
+		if is_instance_valid(dialogue_panel):
+			dialogue_panel.visible = false
+	)
+
+func _start_breath_animation() -> void:
+	if player_sprite == null:
+		return
+	var timer := get_tree().create_timer(0.6)
+	timer.timeout.connect(_on_breath_tick)
+
+func _on_breath_tick() -> void:
+	if player_sprite == null or not is_instance_valid(player_sprite):
+		return
+	_breath_index = (_breath_index + 1) % PLAYER_BREATH_FRAMES.size()
+	var path: String = PLAYER_BREATH_FRAMES[_breath_index]
+	if ResourceLoader.exists(path):
+		player_sprite.texture = load(path)
+	# Loop
+	var timer := get_tree().create_timer(0.6)
+	timer.timeout.connect(_on_breath_tick)
 
 func _on_dialogue_displayed(speaker_name: String, text: String, dream_only: bool) -> void:
 	if dialogue_panel == null or dialogue_speaker == null or dialogue_text == null:

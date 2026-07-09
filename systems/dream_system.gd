@@ -2,7 +2,7 @@ extends Node
 class_name DreamSystem
 
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
-var _eb: Variant
+var _eb: Node
 
 func _ready() -> void:
 	rng.randomize()

@@ -1,8 +1,8 @@
 extends Node
 class_name EndingSystem
 
-var _cdb: Variant
-var _eb: Variant
+var _cdb: ConfigDB
+var _eb: Node
 
 func _ready() -> void:
 	_cdb = get_node_or_null("/root/ConfigDB")

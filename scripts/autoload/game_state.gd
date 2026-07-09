@@ -1,6 +1,6 @@
 extends Node
 
-var _cdb: Variant
+var _cdb: ConfigDB
 
 signal state_changed
 signal day_changed(day: int)
@@ -9,7 +9,7 @@ signal clue_added(clue_id: String)
 signal ending_changed(ending_id: String)
 signal route_changed(route_id: String)
 signal npc_state_changed(npc_id: String, state_value: int)
-signal flag_changed(flag_name: String, value: Variant)
+signal flag_changed(flag_name: String, value: bool)
 
 const DEFAULT_DAY := 1
 const DEFAULT_FOOD := 15
@@ -160,7 +160,7 @@ func add_clue(clue_id: String) -> void:
 	state_changed.emit()
 
 
-func set_flag(flag_name: String, value: Variant) -> void:
+func set_flag(flag_name: String, value: bool) -> void:
 	flags[flag_name] = value
 	flag_changed.emit(flag_name, value)
 	state_changed.emit()
@@ -170,7 +170,7 @@ func clear_flag(flag_name: String) -> void:
 	if not flags.has(flag_name):
 		return
 	flags.erase(flag_name)
-	flag_changed.emit(flag_name, null)
+	flag_changed.emit(flag_name, false)
 	state_changed.emit()
 
 

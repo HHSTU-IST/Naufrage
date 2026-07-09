@@ -4,7 +4,7 @@ const SAVE_DIR := "user://save"
 const SAVE_FILE_TEMPLATE := "slot_%d.json"
 const SAVE_SCHEMA_VERSION := 1
 
-var _gs: Variant
+var _gs: GameState
 
 
 func _ready() -> void:
@@ -48,7 +48,7 @@ func load_game(slot_id: int) -> bool:
 	var raw_text: String = file.get_as_text()
 	file.close()
 
-	var parsed: Variant = JSON.parse_string(raw_text)
+	var parsed = JSON.parse_string(raw_text)
 	if parsed == null or typeof(parsed) != TYPE_DICTIONARY:
 		push_error("SaveManager: invalid save payload in %s" % path)
 		return false

@@ -29,19 +29,19 @@ func get_game_config() -> Resource:
 	return game_config
 
 
-func get_character(character_id: String) -> Variant:
+func get_character(character_id: String) -> Resource:
 	return characters.get(character_id)
 
 
-func get_route(route_id: String) -> Variant:
+func get_route(route_id: String) -> Resource:
 	return routes.get(route_id)
 
 
-func get_dialogue(dialogue_id: String) -> Variant:
+func get_dialogue(dialogue_id: String) -> Resource:
 	return dialogues.get(dialogue_id)
 
 
-func get_ending(ending_id: String) -> Variant:
+func get_ending(ending_id: String) -> Resource:
 	return endings.get(ending_id)
 
 
@@ -87,11 +87,8 @@ func _load_resource(path: String) -> Resource:
 	return null
 
 
-func _load_resource_or_variant(path: String, extension: String) -> Variant:
+func _load_resource_or_variant(path: String, extension: String) -> Resource:
 	if extension == "json":
-		var file: FileAccess = FileAccess.open(path, FileAccess.READ)
-		if file == null:
-			return null
-		return JSON.parse_string(file.get_as_text())
+		return null  # JSON not expected in current resource folders
 	return _load_resource(path)
 

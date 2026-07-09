@@ -2,9 +2,9 @@ extends Node
 
 const DEFAULT_SAVE_SLOT := 0
 
-var _gs: Variant
-var _eb: Variant
-var _sm: Variant
+var _gs: GameState
+var _eb: Node
+var _sm: SaveManager
 
 @onready var day_system: DaySystem = $Systems/DaySystem
 @onready var food_system: FoodSystem = $Systems/FoodSystem
